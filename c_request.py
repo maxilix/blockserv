@@ -3,6 +3,10 @@ class Request():
 
 
 
-
 class Peers(Request):
-	pass
+	def __init__(self,number=1):
+		assert type(number)==int
+		self.number = number
+
+
+

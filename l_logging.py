@@ -65,6 +65,9 @@ class Logger():
 			raise ex(message)
 		return
 
+	def imp_error(self):
+		raise Exception("not implemented")
+
 	def warn(self, message, who=None):
 		if (self.verbosity >= FLAG_WARN):
 			self.__write(FLAG_WARN, message, who=who)

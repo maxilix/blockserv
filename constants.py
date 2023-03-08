@@ -20,6 +20,7 @@ USER_CONFIG_FILENAME 								= "config.json"
 
 
 ##### Connection settings ##########################################################################################################################
+LOCALHOST 											= "127.0.0.1"
 DEFAULT_TRACKER_PORT 								= 50000
 DEFAULT_PEER_PORT 									= 50001
 

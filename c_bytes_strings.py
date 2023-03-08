@@ -7,9 +7,9 @@ import 		time
 from 		math				import 		ceil
 
 
-import 		settings 			as 			C
+import 		constants 			as 			C
 from 		l_logging 			import 		log
-from 		t_crypto 			import 		CryptoTool
+from 		l_crypto 			import 		CryptoTool
 
 
 
@@ -17,12 +17,14 @@ from 		t_crypto 			import 		CryptoTool
 class SimpleBytesString():
 
 	def __init__(self, data):
-		if   type(data) == bytes:
+		if   isinstance(data, SimpleBytesString):
+			self.data = data.data
+		elif type(data) == bytes:
 			self.data = data
 		elif type(data) == str:
-			self.data = data.encode(STRING_ENCODER)
+			self.data = data.encode(C.STRING_ENCODER)
 		elif type(data) == int:
-			self.data = data.to_bytes(ceil(data.bit_length() / 8), byteorder=BYTEORDER)
+			self.data = data.to_bytes(ceil(data.bit_length() / 8), byteorder=C.BYTEORDER)
 		else:
 			log.error("invalid type: '{}' can't be convert in 'bytes'".format(type(data).__name__), ex=TypeError)
 
@@ -33,7 +35,7 @@ class SimpleBytesString():
 		return "0x" + self.data.hex()
 
 	def __int__(self):
-		return int.from_bytes(self.data, byteorder=BYTEORDER)
+		return int.from_bytes(self.data, byteorder=C.BYTEORDER)
 
 	def __len__(self):
 		return len(self.data)
@@ -105,12 +107,11 @@ class Timestamp(SimpleBytesString):
 	def __init__(self, data=None):
 		if data is None:
 			data = time.time()
-		if   type(data) == Timestamp:
-			self.data = data.data
-		elif type(data) == int or type(data) == float:
-			super().__init__(round(1000*data))
-		else:
-			log.error("invalid Timestamp type: '{0}' instead of 'int' or 'float'".format(type(data).__name__), ex=TypeError)
+		if type(data) == int or type(data) == float:
+			data = round(1000*data)
+		super().__init__(data)
+		#else:
+		#	log.error("invalid Timestamp type: '{0}' instead of 'int' or 'float'".format(type(data).__name__), ex=TypeError)
 
 	def __str__(self):
 		milliseconde = int(self)
@@ -122,21 +123,21 @@ class Timestamp(SimpleBytesString):
 class Ip(SimpleBytesString):
 
 	def __init__(self, data):
-		if   type(data) == Ip:
-			self.data = data.data
-		elif type(data) == bytes:
-			if   len(data) == 4:
-				super().__init__(data)
-			else:
-				log.error("invalid length for Ip: {0} instead of 4 bytes expected".format(len(data)), ex=Exception)
+		if   type(data) == bytes:
+			assert len(data) == 4
+			#	super().__init__(data)
+			#else:
+			#	log.error("invalid length for Ip: {0} instead of 4 bytes expected".format(len(data)), ex=Exception)
 		elif type(data) == str:
 			data = [int(e) for e in data.split(".")]
-			if len(data) == 4 and data[0]>=0 and data[0]<=255 and data[1]>=0 and data[1]<=255 and data[2]>=0 and data[2]<=255 and data[3]>=0 and data[3]<=255:
-				super().__init__(bytes(data))
-			else:
-				log.error("invalid Ip string: '255.255.255.255' format expected ", ex=Exception)
-		else:
-			log.error("invalid Ip type: '{0}' instead of 'bytes' or 'str'".format(type(data).__name__), ex=TypeError)
+			assert len(data) == 4 and data[0]>=0 and data[0]<=255 and data[1]>=0 and data[1]<=255 and data[2]>=0 and data[2]<=255 and data[3]>=0 and data[3]<=255
+			data = bytes(data)
+			#	super().__init__(bytes(data))
+			#else:
+			#	log.error("invalid Ip string: '255.255.255.255' format expected ", ex=Exception)
+		super().__init__(data)
+		#else:
+		#	log.error("invalid Ip type: '{0}' instead of 'bytes' or 'str'".format(type(data).__name__), ex=TypeError)
 
 	def __str__(self):
 		return ".".join([str(byte) for byte in self.data])
@@ -146,20 +147,19 @@ class Ip(SimpleBytesString):
 class Port(SimpleBytesString):
 
 	def __init__(self, data):
-		if   type(data) == Port:
-			self.data = data.data
-		elif type(data) == bytes:
-			if   len(data) == 2:
-				super().__init__(data)
-			else:
-				log.error("invalid length for Port: {0} instead of 2 bytes expected".format(len(data)), ex=Exception)
+		if type(data) == bytes:
+			assert len(data) == 2
+			#	super().__init__(data)
+			#else:
+			#	log.error("invalid length for Port: {0} instead of 2 bytes expected".format(len(data)), ex=Exception)
 		elif type(data) == int:
-			if data > 0 and data < 65536:
-				super().__init__(data)
-			else:
-				log.error("invalid Port number: {0} cannot be a port".format(data), ex=Exception)
-		else:
-			log.error("invalid Port type: '{0}' instead of 'bytes' or 'int'".format(type(data).__name__), ex=TypeError)
+			assert data > 0 and data < 65536
+		super().__init__(data)
+
+		#	else:
+		#		log.error("invalid Port number: {0} cannot be a port".format(data), ex=Exception)
+		#else:
+		#	log.error("invalid Port type: '{0}' instead of 'bytes' or 'int'".format(type(data).__name__), ex=TypeError)
 
 	def __str__(self):
 		return str(int(self))

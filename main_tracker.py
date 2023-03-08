@@ -14,8 +14,50 @@ from 		c_request 			import 		*
 from 		c_reply 			import 		*
 
 
-def sort_peer_list():
-	pass
+
+
+
+def receive_identity(addressFrom, identity):
+	print(C.INDENT + "identity received")
+	if identity.is_valid():
+		if identity == addressFrom:
+			print(C.INDENT + C.INFO + "valid identity of sender")
+			if identity in peerList:
+				index = peerList.index(identity)
+				peerList[index].update(Ip(addressFrom[0]), Port(addressFrom[1]))
+				print(C.INDENT + C.INFO + "peer already known, updated")
+			else:
+				peerList.append(identity)
+				print(C.INDENT + C.INFO + "new peer added")
+
+		else:
+			print(C.INDENT + C.WARN + "valid identity but not from sender")
+	else:
+		print(C.INDENT + C.WARN + "invalid identity")
+
+
+
+def request_peers(addressFrom, peerRequest):
+	print(C.INDENT + "peerRequest received")
+	try:
+		index = peerList.index(addressFrom)
+	except:
+		print(C.INDENT + C.WARN + "request from unknown sender")
+		return
+	print(C.INDENT + C.INFO + "request known peer")
+	number = peerRequest.number
+	print(C.INDENT + C.INFO + "send {} identities".format(number))
+	# SEND
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -38,14 +80,18 @@ while(True):
 		print(C.INDENT + C.ERROR + "unable to deserialization")
 		continue
 
-	match type(data):
-		case Identity:
-			if data.is_valid():
-				print(C.INDENT + "identity received")
-				if data.ip == address[0] and data.port == address[1]:
-					print(C.INDENT + C.INFO + "valid identity of sender")
-				else:
-					print(C.INDENT + C.WARN + "valid identity but not from sender")
+	if   isinstance(data, Reply):
+		match type(data):
+			case Identity:
+				receive_identity(address, data)
+
+	elif isinstance(data, Request): 
+		match type(data):
+			case Peers:
+				request_peers(address, data)
+
+
+
 
 
 

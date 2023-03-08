@@ -8,7 +8,8 @@ import 		threading
 import 		pickle
 import 		time
 
-import 		settings 			as 			C
+import 		constants 			as 			C
+import 		tools
 from 		l_logging 			import 		log
 from 		c_bytes_strings		import 		Message, Signature, Cipher, PublicKey, PrivateKey, Ip, Port, Timestamp
 from 		c_request 			import 		*
@@ -38,10 +39,13 @@ class B(A):
 		self.dataB = dataB
 """
 
-myIp     = "127.0.0.1"
-myPort   = 60000
+myIp     = C.LOCALHOST
+myPort   = tools.next_free_port()
 sk = PrivateKey.generate()
 identity = Identity.generate(sk, Ip(myIp), Port(myPort))
+
+peerRequest = Peers(10)
+
 #time.sleep(0.5)
 #identity.timestamp = Timestamp()
 
@@ -55,7 +59,16 @@ UdpMySocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 UdpMySocket.bind((myIp, myPort))
 
 
-tracker = ("127.0.0.1", 50000)
+tracker = (C.LOCALHOST, C.DEFAULT_TRACKER_PORT)
+
+#UdpMySocket.sendto(pickle.dumps(identity), tracker)
+#input()
+
+UdpMySocket.sendto(pickle.dumps(peerRequest), tracker)
+input()
 
 UdpMySocket.sendto(pickle.dumps(identity), tracker)
-print("sent")
+input()
+
+UdpMySocket.sendto(pickle.dumps(peerRequest), tracker)
+input()
